@@ -1,16 +1,27 @@
-import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import FisioPlayLogo from "@/components/FisioPlayLogo";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const { login } = useAuth();
+  const navigate = useNavigate(); // 👈 novo
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // login logic placeholder
+    try {
+      await login(email, password);
+      // 👇 depois do login com sucesso, manda pro dashboard
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error(err);
+      alert("Falha no login: " + (err?.message || "erro"));
+    }
   };
 
   return (

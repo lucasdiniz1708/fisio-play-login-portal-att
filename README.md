@@ -1,3 +1,43 @@
+# Fisio Play — Login Portal
+
+Resumo rápido
+- Projeto React + TypeScript criado com Vite
+- UI pronta (Tailwind + componentes shadcn/Radix)
+- Roteamento mínimo (`/` e `*`)
+
+O que eu adicionei
+- Serviço de autenticação: `src/services/auth.ts` — funções `loginRequest` e `fetchMe`.
+- Helper `authFetch` em `src/lib/api.ts` — adiciona token em requisições.
+- Contexto de autenticação: `src/contexts/AuthContext.tsx` — `AuthProvider` e `useAuth()`.
+- Integração do login na página `src/pages/Index.tsx` (usa `useAuth().login`).
+
+Como conectar ao backend
+1. Defina a variável de ambiente `VITE_API_URL` no seu `.env` (ex: `VITE_API_URL=http://localhost:4000`).
+2. O endpoint de login esperado é `POST ${VITE_API_URL}/auth/login` que deve retornar JSON:
+
+```json
+{ "token": "<jwt>", "user": { "id": "...", "email": "...", "name": "..." } }
+```
+
+3. Opcionalmente `GET ${VITE_API_URL}/auth/me` é usado para buscar dados do usuário quando o token existe.
+
+Como iniciar (desenvolvimento)
+
+```bash
+npm install
+npm run dev
+```
+
+Arquitetura e próximos passos sugeridos
+- Persistência de token: atualmente armazenado em `localStorage` por simplicidade.
+- Proteção de rotas: criar um `PrivateRoute` que verifica `useAuth().user`.
+- Refresh token: implementar refresh/expiração se backend fornecer.
+- Melhor UX: usar toasts/sonner para notificações ao invés de `alert()` (o projeto já tem `sonner`).
+
+Se quiser, eu posso:
+- Implementar rotas privadas e uma tela de dashboard.
+- Substituir `alert()` por toasts e feedback visual.
+- Integrar com um backend de exemplo (mock) para testes locais.
 # Welcome to your Lovable project
 
 ## Project info
