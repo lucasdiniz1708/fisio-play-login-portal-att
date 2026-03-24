@@ -16,8 +16,7 @@ const Index = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      // 👇 depois do login com sucesso, manda pro dashboard
-      navigate("/dashboard");
+      navigate("/", { replace: true });
     } catch (err: any) {
       console.error(err);
       alert("Falha no login: " + (err?.message || "erro"));

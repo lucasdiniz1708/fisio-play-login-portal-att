@@ -1,66 +1,69 @@
-import { fetchMe, loginRequest } from "@/services/auth";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { clearToken, getToken, setToken } from "../lib/storage";
+import { fetchMe, loginRequest, MeResponse } from "../services/auth";
 
-type User = { id: string; email: string; name?: string } | null;
-
-type AuthContextValue = {
-  user: User;
-  token: string | null;
+type AuthState = {
+  me: MeResponse | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  isPro: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshMe: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextValue>({
-  user: null,
-  token: null,
-  login: async () => {},
-  logout: () => {},
-});
+const AuthContext = createContext<AuthState | null>(null);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [token, setToken] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("auth.token") : null
-  );
-  const [user, setUser] = useState<User>(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem("auth.user") : null;
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [me, setMe] = useState<MeResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refreshMe = async () => {
+    const token = getToken();
+    if (!token) {
+      setMe(null);
+      return;
     }
-  });
+    const meResp = await fetchMe(token);
+    setMe(meResp);
+  };
 
   useEffect(() => {
-    if (token && !user) {
-      fetchMe(token)
-        .then((u) => {
-          setUser(u);
-          localStorage.setItem("auth.user", JSON.stringify(u));
-        })
-        .catch(() => {
-          // ignore
-        });
-    }
-  }, [token]);
+    (async () => {
+      try {
+        await refreshMe();
+      } catch {
+        clearToken();
+        setMe(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = async (email: string, password: string) => {
-    const { token: t, user: u } = await loginRequest(email, password);
-    setToken(t);
-    setUser(u);
-    localStorage.setItem("auth.token", t);
-    localStorage.setItem("auth.user", JSON.stringify(u));
+    const { accessToken } = await loginRequest(email, password);
+    setToken(accessToken);
+    await refreshMe();
   };
 
   const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("auth.token");
-    localStorage.removeItem("auth.user");
+    clearToken();
+    setMe(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>{children}</AuthContext.Provider>
-  );
-};
+  const value = useMemo<AuthState>(() => {
+    const isAuthenticated = !!getToken() && !!me;
+    const isPro = me?.role === "PRO";
+    return { me, loading, isAuthenticated, isPro, login, logout, refreshMe };
+  }, [me, loading]);
 
-export const useAuth = () => useContext(AuthContext);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}

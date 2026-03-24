@@ -1,30 +1,38 @@
-export type LoginResponse = {
-  token: string;
-  user: { id: string; email: string; name?: string };
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
+export type MeResponse = {
+  id: string;
+  role: "PRO" | string;
+  name: string;
+  email: string;
 };
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
-console.log("API_BASE =>", API_BASE);
+export async function loginRequest(email: string, password: string) {
+  const body = new URLSearchParams();
+  body.set("username", email);
+  body.set("password", password);
 
-export async function loginRequest(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE}/auth/login`, {
+  const res = await fetch(`${API_BASE}/v1/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept": "application/json",
+    },
+    body,
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Login failed");
-  }
+  if (!res.ok) throw new Error(await res.text());
+  const data = await res.json();
 
-  return res.json();
+  // backend retorna: { access_token, token_type }
+  if (!data?.access_token) throw new Error("Login não retornou access_token.");
+  return { accessToken: data.access_token as string, tokenType: data.token_type as string };
 }
 
-export async function fetchMe(token: string) {
-  const res = await fetch(`${API_BASE}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
+export async function fetchMe(accessToken: string): Promise<MeResponse> {
+  const res = await fetch(`${API_BASE}/v1/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) throw new Error("Failed to fetch user");
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
