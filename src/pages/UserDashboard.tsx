@@ -4,18 +4,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Activity, Calendar, LogOut, Users } from "lucide-react";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { me, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-[image:var(--gradient-bg)] px-4 py-6">
       {/* Header */}
       <header className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl bg-card/80 px-6 py-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
-          <FisioPlayLogo className="h-8 w-8" />
+          <FisioPlayLogo/>
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Fisio Play · Portal do Paciente</h1>
+            <h1 className="text-lg font-semibold tracking-tight">Portal do Paciente</h1>
             <p className="text-xs text-muted-foreground">
-              Bem-vindo(a), {user?.name || user?.email || "profissional"} 👋
+              Bem-vindo(a), {me?.name || me?.email} 👋
             </p>
           </div>
         </div>

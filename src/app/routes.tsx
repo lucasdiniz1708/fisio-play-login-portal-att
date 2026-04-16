@@ -8,6 +8,10 @@ import ProDashboard from "../pages/ProDashboard";
 import UserDashboard from "../pages/UserDashboard";
 import NewPatientPage from "../pages/NewPatientPage";
 import NewExercisePage from "../pages/NewExercisePage";
+import MyPatientsPage from "../pages/MyPatientsPage";
+import PatientDetailsPage from "../pages/PatientDetailsPage";
+import PrescribeExercisePage from "../pages/PrescribeExercisePage";
+import PatientAssignmentsPage from "../pages/PatientAssignmentsPage";
 
 export default function AppRoutes() {
   return (
@@ -56,6 +60,42 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
             <NewExercisePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/patients"
+        element={
+          <ProtectedRoute>
+            <MyPatientsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/patients/:id"
+        element={
+          <ProtectedRoute>
+            <PatientDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/patients/:id/prescribe"
+        element={
+          <ProtectedRoute>
+            <PrescribeExercisePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/patients/:id/assignments"
+        element={
+          <ProtectedRoute>
+            <PatientAssignmentsPage />
           </ProtectedRoute>
         }
       />
