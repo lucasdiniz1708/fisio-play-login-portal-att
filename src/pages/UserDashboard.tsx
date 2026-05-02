@@ -1,4 +1,4 @@
-// src/pages/Dashboard.tsx
+import CameraStream from "@/components/CameraStream";
 import FisioPlayLogo from "@/components/FisioPlayLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { Activity, Calendar, LogOut, Users } from "lucide-react";
@@ -61,6 +61,17 @@ const Dashboard = () => {
           </div>
         </section>
 
+        {/* Módulo de câmera */}
+        <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold tracking-tight">Câmera · Análise de Movimento</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ative a câmera para iniciar a captura e transmissão de frames ao serviço de visão computacional.
+            </p>
+          </div>
+          <CameraStream fps={8} width={640} height={480} />
+        </section>
+		
         {/* Lista / próximos passos */}
         <section className="grid gap-4 md:grid-cols-[2fr,1.2fr]">
           <div className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur">
